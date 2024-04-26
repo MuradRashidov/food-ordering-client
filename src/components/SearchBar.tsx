@@ -5,6 +5,7 @@ import { Form, FormControl, FormField, FormItem } from "./ui/form";
 import { Search } from "lucide-react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
+import { useEffect } from "react";
 
 const formSchema = z.object({
     searchQuery: z.string({
@@ -16,14 +17,18 @@ type Props = {
     placeHolder:string;
     onSubmit:(formData:SearchForm)=> void;
     onReset?:()=>void;
+    searchQuery?:string
 }
-export default function SearchBar({placeHolder,onSubmit,onReset}:Props) {
+export default function SearchBar({placeHolder,onSubmit,onReset,searchQuery}:Props) {
     const form = useForm<SearchForm>({
         resolver:zodResolver(formSchema),
         defaultValues:{
-            searchQuery:""
+            searchQuery
         }
-    })
+    });
+    useEffect(()=>{
+        form.reset({searchQuery})
+    },[form, searchQuery])
     const handleReset = () => {
         form.reset({
             searchQuery:""
@@ -36,7 +41,7 @@ export default function SearchBar({placeHolder,onSubmit,onReset}:Props) {
     <Form {...form}>
         <form 
             onSubmit={form.handleSubmit(onSubmit)}
-            className={`flex flex-center gap-3 justify-between flex-row border-2 rounded-full p-3 mx-5 
+            className={`flex flex-center gap-3 justify-between flex-row border-2 rounded-full p-3 
             ${form.formState.errors.searchQuery && "border-red-500"}`}
             >
             <Search strokeWidth={2.5} size={30} className="ml-1 text-orange-500 hidden md:block"/>
@@ -55,15 +60,13 @@ export default function SearchBar({placeHolder,onSubmit,onReset}:Props) {
                     </FormItem>
                 )}
             />
-            {form.formState.isDirty && (
-                <Button 
+            <Button 
                     onClick={handleReset}
                     className="rounded-full" 
                     variant="outline" 
                     type="button">
-                    Clear
+                    Reset
                 </Button>
-            )}
             <Button 
                type="submit"
                className="rounded-full bg-orange-500"
